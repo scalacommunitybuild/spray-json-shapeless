@@ -85,17 +85,27 @@ import shapeless._, labelled.{ field, FieldType }, syntax.singleton._
  * element. The best way to avoid this is:
  *
  * 1. define the protocol/formatters in sibling, or otherwise
- *    independent, non-cyclic, packages.
+ *    independent, non-cyclic, packages. In particular, if you define
+ *    your domain objects in `foo.domain` and your formats in
+ *    `foo.formats`, note that you will not be able to access the
+ *    formats from the `foo` parent package (this catches a lot of
+ *    people out). Another approach is to use separate projects for
+ *    the domain and formats, which avoids the problem entirely whilst
+ *    allowing you to provide zero dependency packages of your domain
+ *    objects to downstream consumers (I believe this to be good
+ *    practice in a microservices world, as it effectively means
+ *    exporting your schema).
  *
  * 2. define all your custom rules in an `object` that extends
  *    `FamilyFormats` so that the implicit resolution priority rules
  *    work in your favour (see tests for an example of this style).
- *
- * Finally, if you have `scala.Symbol` in your family, you need to
- * provide an explicit `implicit val symbolFormat = SymbolJsonFormat`,
- * similarly for `JsObjectFormat` (and there may be others). Most
- * concerning, we have no idea why. Shapeless' derived orphans may be
- * significant in finding a solution.
+ *    The derived `familyFormat` will win over implicit formats that
+ *    have been inherited from a lower implicit scope, so you will
+ *    often have to explicitly bring them back into the higher scope
+ *    by listing each -- see FamilyFormats for an example using
+ *    `SymbolFormat` and a user-defined format. i.e. provide an
+ *    explicit `implicit val symbolFormat = SymbolJsonFormat`,
+ *    similarly for `JsObjectFormat`.
  */
 trait FamilyFormats extends LowPriorityFamilyFormats {
   this: StandardFormats =>
@@ -107,7 +117,7 @@ object FamilyFormats extends DefaultJsonProtocol with FamilyFormats
 
 /* low priority implicit scope so user-defined implicits take precedence */
 private[sjs] trait LowPriorityFamilyFormats
-    extends JsonFormatXor with JsonFormatHints {
+    extends JsonFormatHints {
   this: StandardFormats with FamilyFormats =>
 
   private[sjs] def log = LoggerFactory.getLogger(getClass)
@@ -259,8 +269,7 @@ private[sjs] trait LowPriorityFamilyFormats
     implicit
     gen: LabelledGeneric.Aux[T, Repr],
     sg: Lazy[WrappedRootJsonFormat[T, Repr]],
-    tpe: Typeable[T],
-    not: NoExistingJsonFormat[T]
+    tpe: Typeable[T]
   ): RootJsonFormat[T] = new RootJsonFormat[T] {
     if (log.isTraceEnabled)
       log.trace(s"creating ${tpe.describe}")
@@ -268,29 +277,6 @@ private[sjs] trait LowPriorityFamilyFormats
     def read(j: JsValue): T = gen.from(sg.value.read(j))
     def write(t: T): JsObject = sg.value.write(gen.to(t))
   }
-}
-
-/**
- * a.k.a. the "ambiguous implicits" trick:
- * http://stackoverflow.com/questions/15962743
- *
- * If a `JsonFormat[A]` is already defined elsewhere, both of the
- * implicit defs here will trigger and result in an ambiguous
- * implicit compilation error.
- *
- * Requiring an implicit `NoExistingJsonFormat` on a method will
- * guarantee that it can only be called if there is no existing
- * `JsonFormat` (note that it will not match on existing
- * `RootJsonFormat`, but that's not needed).
- *
- * Typically called `Not`, I have renamed it `Xor` because it feels
- * more like an exclusive OR constraint to me.
- */
-trait JsonFormatXor {
-  trait Xor[T]
-  implicit def alwaysDefined[T]: Xor[JsonFormat[T]] = new Xor[JsonFormat[T]] {}
-  implicit def onlyIfJsonFormatDefined[T: JsonFormat]: Xor[JsonFormat[T]] = new Xor[JsonFormat[T]] {}
-  type NoExistingJsonFormat[T] = Xor[JsonFormat[T]]
 }
 
 trait JsonFormatHints {
