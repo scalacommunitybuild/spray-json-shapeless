@@ -12,10 +12,10 @@ import shapeless._, labelled.{ field, FieldType }, syntax.singleton._
  * of sealed traits and case classes/objects) for spray-json.
  *
  * Shapeless allows us to view sealed traits as "co-products" (aka
- * `CList`s) and to view case classes / objects as "products" (aka
+ * `Coproduct`s) and to view case classes / objects as "products" (aka
  * `HList`s).
  *
- * Here we write marshallers for `HList`s and `CList`s and a converter
+ * Here we write marshallers for `HList`s and `Coproduct`s and a converter
  * to/from the generic form.
  *
  * =Customisation=
@@ -123,7 +123,7 @@ private[sjs] trait LowPriorityFamilyFormats
   private[sjs] def log = LoggerFactory.getLogger(getClass)
 
   /**
-   * a `JsonFormat[HList]` or `JsonFormat[CList]` would not retain the
+   * a `JsonFormat[HList]` or `JsonFormat[Coproduct]` would not retain the
    * type information for the full generic that it is serialising.
    * This allows us to pass the wrapped type, achieving: 1) custom
    * `CoproductHint`s on a per-trait level 2) configurable `null` behaviour
@@ -225,8 +225,8 @@ private[sjs] trait LowPriorityFamilyFormats
     def write(c: CNil) = serError("write should never be called for CNil")
   }
 
-  // CList with a FieldType at the head
-  implicit def cListFormat[Wrapped, Name <: Symbol, Instance, Remaining <: Coproduct](
+  // Coproduct with a FieldType at the head
+  implicit def coproductFormat[Wrapped, Name <: Symbol, Instance, Remaining <: Coproduct](
     implicit
     tpe: Typeable[Wrapped],
     th: CoproductHint[Wrapped],
@@ -257,7 +257,7 @@ private[sjs] trait LowPriorityFamilyFormats
     }
 
   /**
-   * Format for `LabelledGenerics` that uses the `HList` or `CList`
+   * Format for `LabelledGenerics` that uses the `HList` or `Coproduct`
    * marshaller above.
    *
    * `Blah.Aux[T, Repr]` is a trick to work around scala compiler
