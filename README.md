@@ -4,18 +4,18 @@ Automatically derive [spray-json][spray-json] `JsonFormat`s, powered by [shapele
 
 For documentation, [read the scaladocs](src/main/scala/fommil/sjs/FamilyFormats.scala) and for examples [read the test cases](src/test/scala/fommil/sjs/FamilyFormatsSpec.scala).
 
-**Please read the documentation --- especially the caveats --- and examples thoroughly before raising a ticket.**
+**Please read the documentation - especially the caveats - and examples before raising a ticket.**
 
 ## TL;DR
 
 ```scala
 // always check maven central for the lastest release
-libraryDependencies += "com.github.fommil" %% "spray-json-shapeless" % "1.0.0"
+libraryDependencies += "com.github.fommil" %% "spray-json-shapeless" % "1.1.0"
 ```
 
 ```scala
 import spray.json._
-import fommil.sjs._
+import fommil.sjs.FamilyFormats._
 
 package domain {
   sealed trait SimpleTrait
@@ -26,7 +26,6 @@ package domain {
 }
 package use {
   import domain._
-  import FamilyFormats._
 
   Foo("foo").toJson              // """{"s":"foo"}"""
   Faz(Some("meh")).toJson        // """{"o":"meh"}"""
