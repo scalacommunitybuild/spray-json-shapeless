@@ -23,11 +23,9 @@ package examples {
   case class Schpugel(v: String) // I asked my wife to make up a word
   case class Smim(v: String) // I should stop asking my wife to make up words
 
-  sealed trait StringEnum {
-    def label: String
-  }
-  case class Flooma(label: String) extends StringEnum // to be fair, that was mine
-  case class Blam(label: String) extends StringEnum
+  sealed trait Smash
+  case class Flooma(label: String) extends Smash
+  case class Blam(label: String) extends Smash
 
   sealed trait Cloda
   case class Plooba(thing: String) extends Cloda // *sigh*
@@ -58,11 +56,43 @@ package examples {
   case class Hominidae(id: UUID) extends Hominoidea
 
 }
-object ExamplesFormats extends DefaultJsonProtocol with FamilyFormats {
+
+trait LowPriorityUserFormats {
+  import examples._
+  ///////////////////////////////////////////////
+  // non-trivial user-defined JsonFormat (not RootJsonFormat)
+  //
+  // This is in a lower priority implicit scope than the familyFormats
+  // (caveat #2), so we have two options to force its visibility:
+  //
+  // 1. do the same trick as with SymbolJsonFormat
+  // 2. shadow familyFormat with a non-implicit variant (see below)
+  //
+  // Most usecases will prefer option 1. Note that the same trick is
+  // needed for JsonFormats and RootJsonFormats, there is nothing
+  // special about this being JsonFormat.
+  implicit val SmashFormat: JsonFormat[Smash] = new JsonFormat[Smash] {
+    def read(json: JsValue): Smash = json match {
+      case obj: JsObject => obj.fields.head match {
+        case ("flooma", JsString(label)) => Flooma(label)
+        case ("blam", JsString(label)) => Blam(label)
+        case _ => deserializationError("expected (kind,JsString), got " + json)
+      }
+      case _ => deserializationError("expected JsString, got " + json)
+    }
+    def write(obj: Smash): JsValue = obj match {
+      case Flooma(label) => JsObject("flooma" -> JsString(label))
+      case Blam(label) => JsObject("blam" -> JsString(label))
+    }
+  }
+}
+
+object ExamplesFormats extends DefaultJsonProtocol with FamilyFormats with LowPriorityUserFormats {
   import examples._
 
-  // wtf?? why is this needed, why does it even work? Miles??
-  implicit val symbolFormat = SymbolJsonFormat
+  // WORKAROUND caveat 2 (interestingly, adding type signatures breaks everything)
+  implicit val highPrioritySymbolFormat = SymbolJsonFormat
+  implicit val highPrioritySmashFormat = SmashFormat
 
   ///////////////////////////////////////////////
   // Example of "explicit implicit" for performance
@@ -124,20 +154,6 @@ object ExamplesFormats extends DefaultJsonProtocol with FamilyFormats {
       case other => deserializationError(s"unexpected $other")
     }
     def write(s: Smim): JsValue = JsObject("smim" -> JsString(s.v))
-  }
-
-  ///////////////////////////////////////////////
-  // non-trivial user-defined JsonFormat
-  implicit def stringEnumFormat[T <: StringEnum](
-    implicit
-    g: Generic.Aux[T, String :: HNil],
-    tpe: Typeable[T]
-  ): JsonFormat[T] = new JsonFormat[T] {
-    def read(json: JsValue): T = json match {
-      case JsString(value) => g.from(value :: HNil)
-      case _ => deserializationError("expected JsString, got " + json)
-    }
-    def write(obj: T): JsValue = JsString(obj.label)
   }
 }
 
@@ -236,16 +252,9 @@ class FamilyFormatsSpec extends FlatSpec with Matchers
   }
 
   it should "prefer non-trivial user customisable JsonFormats" in {
-    roundtrip(Flooma("aha"), """"aha"""")
-
-    // This might surprise you: the user's custom formatter for the
-    // classes in this family is a `JsonFormat` (not a
-    // `RootJsonFormat`), so when we serialise the trait, it is forced
-    // to fall back to the derived product rule, not the custom one,
-    // because it expects a `RootJsonFormat`. Funky.
-
-    // WORKAROUND: https://github.com/fommil/spray-json-shapeless/issues/5
-    //roundtrip(Flooma("aha"): StringEnum, """{"type":"Flooma","label":"aha"}""")
+    // uncomment the next line as an alternative to the redefinition of FloomaFormat
+    // def familyFormat = ???
+    roundtrip(Flooma("aha"): Smash, """{"flooma":"aha"}""") // via our JsonFormat[Smash]
   }
 
   it should "fail to compile when a member of the family cannot be serialised" in {
