@@ -268,7 +268,7 @@ private[sjs] trait LowPriorityFamilyFormats
   implicit def familyFormat[T, Repr](
     implicit
     gen: LabelledGeneric.Aux[T, Repr],
-    sg: Strict[WrappedRootJsonFormat[T, Repr]],
+    sg: Strict.Global[WrappedRootJsonFormat[T, Repr]],
     tpe: Typeable[T]
   ): RootJsonFormat[T] = new RootJsonFormat[T] {
     if (log.isTraceEnabled)
