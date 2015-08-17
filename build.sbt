@@ -8,8 +8,10 @@ scalaVersion := "2.11.7"
 
 version := "1.2.0-SNAPSHOT"
 
+resolvers += Resolver.sonatypeRepo("snapshots")
+
 libraryDependencies ++= Seq(
-  "com.chuusai" %% "shapeless" % "2.2.5",
+  "com.chuusai" %% "shapeless" % "2.3.0-SNAPSHOT",
   "io.spray" %% "spray-json" % "1.3.2",
   "org.slf4j" % "slf4j-api" % "1.7.12",
   "org.scalatest" %% "scalatest" % "2.2.5" % "test",
