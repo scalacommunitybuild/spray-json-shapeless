@@ -163,7 +163,7 @@ private[sjs] trait LowPriorityFamilyFormats
     ph: ProductHint[Wrapped],
     key: Witness.Aux[Key],
     jfh: Lazy[JsonFormat[Value]], // svc doesn't need to be a RootJsonFormat
-    jft: Lazy[WrappedRootJsonFormat[Wrapped, Remaining]]
+    jft: WrappedRootJsonFormat[Wrapped, Remaining]
   ): WrappedRootJsonFormat[Wrapped, FieldType[Key, Value] :: Remaining] =
     new WrappedRootJsonFormat[Wrapped, FieldType[Key, Value] :: Remaining] {
       private[this] val fieldName = ph.fieldName(key.value)
@@ -192,18 +192,18 @@ private[sjs] trait LowPriorityFamilyFormats
           case _ =>
             missingFieldError(j)
         }
-        val remaining = jft.value.read(j)
+        val remaining = jft.read(j)
         field[Key](resolved) :: remaining
       }
 
       def write(ft: FieldType[Key, Value] :: Remaining) = (jfh.value.write(ft.head), jfh.value) match {
         // (JsNull, _) means the underlying formatter serialises to JsNull
         case (JsNull, _) if ph.nulls == NeverJsNull =>
-          jft.value.write(ft.tail)
+          jft.write(ft.tail)
         case (JsNull, _) if ph.nulls == JsNullNotNone & ft.head == None =>
-          jft.value.write(ft.tail)
+          jft.write(ft.tail)
         case (value, _) =>
-          jft.value.write(ft.tail) match {
+          jft.write(ft.tail) match {
             case JsObject(others) =>
               // when gathering results, we must remember that 'other'
               // is to the right of us and this seems to be the
@@ -232,7 +232,7 @@ private[sjs] trait LowPriorityFamilyFormats
     th: CoproductHint[Wrapped],
     key: Witness.Aux[Name],
     jfh: Lazy[RootJsonFormat[Instance]],
-    jft: Lazy[WrappedRootJsonFormat[Wrapped, Remaining]]
+    jft: WrappedRootJsonFormat[Wrapped, Remaining]
   ): WrappedRootJsonFormat[Wrapped, FieldType[Name, Instance] :+: Remaining] =
     new WrappedRootJsonFormat[Wrapped, FieldType[Name, Instance] :+: Remaining] {
       def readJsObject(j: JsObject) = th.read(j, key.value) match {
@@ -241,7 +241,7 @@ private[sjs] trait LowPriorityFamilyFormats
           Inl(field[Name](recovered))
 
         case None =>
-          Inr(jft.value.read(j))
+          Inr(jft.read(j))
       }
 
       def write(lr: FieldType[Name, Instance] :+: Remaining) = lr match {
@@ -252,7 +252,7 @@ private[sjs] trait LowPriorityFamilyFormats
           }
 
         case Inr(r) =>
-          jft.value.write(r)
+          jft.write(r)
       }
     }
 
@@ -263,12 +263,12 @@ private[sjs] trait LowPriorityFamilyFormats
    * `Blah.Aux[T, Repr]` is a trick to work around scala compiler
    * constraints. We'd really like to have only one type parameter
    * (`T`) implicit list `g: LabelledGeneric[T], f:
-   * Lazy[JsonFormat[T.Repr]]` but that's not possible.
+   * Strict[JsonFormat[T.Repr]]` but that's not possible.
    */
   implicit def familyFormat[T, Repr](
     implicit
     gen: LabelledGeneric.Aux[T, Repr],
-    sg: Lazy[WrappedRootJsonFormat[T, Repr]],
+    sg: Strict.Global[WrappedRootJsonFormat[T, Repr]],
     tpe: Typeable[T]
   ): RootJsonFormat[T] = new RootJsonFormat[T] {
     if (log.isTraceEnabled)
