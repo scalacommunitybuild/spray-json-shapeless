@@ -263,19 +263,19 @@ private[sjs] trait LowPriorityFamilyFormats
    * `Blah.Aux[T, Repr]` is a trick to work around scala compiler
    * constraints. We'd really like to have only one type parameter
    * (`T`) implicit list `g: LabelledGeneric[T], f:
-   * Strict[JsonFormat[T.Repr]]` but that's not possible.
+   * Cached[Strict[JsonFormat[T.Repr]]]` but that's not possible.
    */
   implicit def familyFormat[T, Repr](
     implicit
     gen: LabelledGeneric.Aux[T, Repr],
-    sg: Strict.Global[WrappedRootJsonFormat[T, Repr]],
+    sg: Cached[Strict[WrappedRootJsonFormat[T, Repr]]],
     tpe: Typeable[T]
   ): RootJsonFormat[T] = new RootJsonFormat[T] {
     if (log.isTraceEnabled)
       log.trace(s"creating ${tpe.describe}")
 
-    def read(j: JsValue): T = gen.from(sg.value.read(j))
-    def write(t: T): JsObject = sg.value.write(gen.to(t))
+    def read(j: JsValue): T = gen.from(sg.value.value.read(j))
+    def write(t: T): JsObject = sg.value.value.write(gen.to(t))
   }
 }
 
