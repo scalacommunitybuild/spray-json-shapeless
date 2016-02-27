@@ -10,7 +10,7 @@ For documentation, [read the scaladocs](src/main/scala/fommil/sjs/FamilyFormats.
 
 ```scala
 // always check maven central for the lastest release
-libraryDependencies += "com.github.fommil" %% "spray-json-shapeless" % "1.1.0"
+libraryDependencies += "com.github.fommil" %% "spray-json-shapeless" % "1.2.0"
 ```
 
 ```scala

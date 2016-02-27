@@ -9,7 +9,7 @@ object SprayJsonShapelessBuild extends Build {
   lazy override val settings = super.settings ++ Seq(
     scalaVersion := "2.11.7",
     organization := "com.github.fommil",
-    version := "1.2.0"
+    version := "1.2.1-SNAPSHOT"
   )
 
   lazy val root = Project("root", file(".")).settings(
