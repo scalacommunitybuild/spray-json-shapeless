@@ -5,7 +5,7 @@ import scala.collection.immutable.ListMap
 
 import spray.json._
 
-import shapeless._, labelled.{ field, FieldType }, syntax.singleton._
+import shapeless._, labelled.{ field, FieldType }
 
 /**
  * Automatically create product/coproduct marshallers (i.e. families
@@ -325,7 +325,7 @@ trait JsonFormatHints {
     def write[Name <: Symbol](j: JsObject, n: Name): JsObject = {
       // runtime error, would be nice if we could check this at compile time
       if (j.fields.contains(key))
-        serError("typehint '$key' collides with existing field ${j.fields(key)}")
+        serError(s"typehint '$key' collides with existing field ${j.fields(key)}")
       JsObject(ListMap(key -> JsString(fieldName(n.name))) ++: j.fields)
     }
   }
