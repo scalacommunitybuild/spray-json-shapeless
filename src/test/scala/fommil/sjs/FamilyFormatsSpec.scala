@@ -55,6 +55,8 @@ package examples {
   case object Hylobatidae extends Hominoidea
   case class Hominidae(id: UUID) extends Hominoidea
 
+  // recursive cat
+  case class Cat(nick: String, tail: Option[Cat] = None)
 }
 
 trait LowPriorityUserFormats {
@@ -174,6 +176,14 @@ class FamilyFormatsSpec extends FlatSpec with Matchers
   it should "support case classes" in {
     roundtrip(Foo("foo"), """{"s":"foo"}""")
     roundtrip(Bar(), "{}")
+  }
+
+  it should "support recursive case classes" in {
+    roundtrip(
+      Cat("foo",
+        Some(Cat("bar",
+          Some(Cat("baz"))))),
+      """{"nick":"foo","tail":{"nick":"bar","tail":{"nick":"baz"}}}""")
   }
 
   it should "support optional parameters on case classes" in {
