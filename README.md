@@ -17,23 +17,23 @@ libraryDependencies += "com.github.fommil" %% "spray-json-shapeless" % "1.2.0"
 import spray.json._
 import fommil.sjs.FamilyFormats._
 
-package domain {
+object domain {
   sealed trait SimpleTrait
   case class Foo(s: String) extends SimpleTrait
   case class Bar() extends SimpleTrait
   case object Baz extends SimpleTrait
   case class Faz(o: Option[String]) extends SimpleTrait
 }
-package use {
+object use {
   import domain._
 
-  Foo("foo").toJson              // """{"s":"foo"}"""
-  Faz(Some("meh")).toJson        // """{"o":"meh"}"""
-  Faz(None).toJson               // """{}"""
-  Foo("foo"): SimpleTrait.toJson // """{"type":"Foo","s":"foo"}"""
-  Bar(): SimpleTrait.toJson      // """{"type":"Bar"}"""
-  Baz: SimpleTrait.toJson        // """{"type":"Baz"}"""
-  Fuzz: SimpleTrait.toJson       // """{"type":"Fuzz"}"""
+  Foo("foo").toJson                // """{"s":"foo"}"""
+  Faz(Some("meh")).toJson          // """{"o":"meh"}"""
+  Faz(None).toJson                 // """{}"""
+  (Foo("foo"): SimpleTrait).toJson // """{"type":"Foo","s":"foo"}"""
+  (Bar(): SimpleTrait).toJson      // """{"type":"Bar"}"""
+  (Baz: SimpleTrait).toJson        // """{"type":"Baz"}"""
+  (Faz(None): SimpleTrait).toJson  // """{"type":"Faz"}"""
 }
 ```
 
