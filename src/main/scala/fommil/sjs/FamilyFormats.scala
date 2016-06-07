@@ -180,7 +180,7 @@ private[sjs] trait LowPriorityFamilyFormats
           case (None, f) if ph.nulls == AlwaysJsNull =>
             missingFieldError(j)
 
-          case (None, f: OptionFormat[_]) if ph.nulls == JsNullNotNone =>
+          case (None, f: OptionFormat[_]) if ph.nulls == JsNullNotNone || ph.nulls == AlwaysJsNullTolerateAbsent =>
             None.asInstanceOf[Value]
 
           case (Some(JsNull), f: OptionFormat[_]) if ph.nulls == JsNullNotNone =>
@@ -365,6 +365,8 @@ trait JsonFormatHints {
   case object JsNullNotNone extends JsNullBehaviour
   /** No values serialising to `JsNull` will be included in the wire format. Ambiguous. */
   case object NeverJsNull extends JsNullBehaviour
+  /** Same as AlwaysJsNull when serialising, with missing values treated as optional upon deserialisation. Ambiguous. */
+  case object AlwaysJsNullTolerateAbsent extends JsNullBehaviour
 
   trait ProductHint[T] {
     def nulls: JsNullBehaviour = JsNullNotNone

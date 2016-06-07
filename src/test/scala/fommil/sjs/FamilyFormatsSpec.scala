@@ -34,6 +34,7 @@ package examples {
   case class Huey(duck: Quack.type, witch: Option[Quack.type])
   case class Dewey(duck: Quack.type, witch: Option[Quack.type])
   case class Louie(duck: Quack.type, witch: Option[Quack.type])
+  case class Bluey(duck: Quack.type, witch: Option[Quack.type])
 
   // I love monkeys, you got a problem with that?
   sealed trait Primates
@@ -125,6 +126,9 @@ object ExamplesFormats extends DefaultJsonProtocol with FamilyFormats with LowPr
   implicit object LouieHint extends ProductHint[Louie] {
     override def nulls = NeverJsNull
   }
+  implicit object BlueyHint extends ProductHint[Bluey] {
+    override def nulls = AlwaysJsNullTolerateAbsent
+  }
   implicit object QuackFormat extends JsonFormat[Quack.type] {
     // needed something that would serialise to JsNull for testing
     def read(j: JsValue): Quack.type = j match {
@@ -180,10 +184,15 @@ class FamilyFormatsSpec extends FlatSpec with Matchers
 
   it should "support recursive case classes" in {
     roundtrip(
-      Cat("foo",
-        Some(Cat("bar",
-          Some(Cat("baz"))))),
-      """{"nick":"foo","tail":{"nick":"bar","tail":{"nick":"baz"}}}""")
+      Cat(
+        "foo",
+        Some(Cat(
+          "bar",
+          Some(Cat("baz"))
+        ))
+      ),
+      """{"nick":"foo","tail":{"nick":"bar","tail":{"nick":"baz"}}}"""
+    )
   }
 
   it should "support optional parameters on case classes" in {
@@ -227,11 +236,13 @@ class FamilyFormatsSpec extends FlatSpec with Matchers
     roundtrip(Huey(Quack, None), """{"duck":null,"witch":null}""")
     roundtrip(Dewey(Quack, None), """{"duck":null}""")
     roundtrip(Louie(Quack, None), """{}""")
+    roundtrip(Bluey(Quack, None), """{"duck":null,"witch":null}""")
 
     val json = """{"duck":null,"witch":null}""".parseJson
     json.convertTo[Huey] shouldBe Huey(Quack, None)
     json.convertTo[Dewey] shouldBe Dewey(Quack, Some(Quack))
     json.convertTo[Louie] shouldBe Louie(Quack, None)
+    json.convertTo[Bluey] shouldBe Bluey(Quack, None)
   }
 
   it should "fail when missing required (null) values" in {
@@ -245,12 +256,16 @@ class FamilyFormatsSpec extends FlatSpec with Matchers
       noduck.convertTo[Dewey]
     }
     noduck.convertTo[Louie] shouldBe Louie(Quack, None)
+    intercept[DeserializationException] {
+      noduck.convertTo[Bluey]
+    }
 
     intercept[DeserializationException] {
       nowitch.convertTo[Huey]
     }
     nowitch.convertTo[Dewey] shouldBe Dewey(Quack, None)
     nowitch.convertTo[Louie] shouldBe Louie(Quack, None)
+    nowitch.convertTo[Bluey] shouldBe Bluey(Quack, None)
   }
 
   it should "prefer user customisable JsonFormats" in {
