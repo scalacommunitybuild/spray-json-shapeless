@@ -7,7 +7,7 @@ import SonatypeSupport._
 object SprayJsonShapelessBuild extends Build {
 
   lazy override val settings = super.settings ++ Seq(
-    scalaVersion := "2.11.7",
+    scalaVersion := "2.11.8",
     organization := "com.github.fommil",
     version := "1.2.1-SNAPSHOT"
   )
