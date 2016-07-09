@@ -10,13 +10,13 @@ object SprayJsonShapelessBuild extends Build {
   lazy override val settings = super.settings ++ Seq(
     scalaVersion := "2.11.8",
     organization := "com.github.fommil",
-    version := "1.3.0"
+    version := "1.3.1-SNAPSHOT"
   )
 
   lazy val root = Project("spray-json-shapeless", file(".")).settings(
     Sensible.settings ++ sonatype("fommil", "spray-json-shapeless", Apache2)
   ).settings(
-    mimaPreviousArtifacts := Set(organization.value %% name.value % "1.2.0"),
+    mimaPreviousArtifacts := Set(organization.value %% name.value % "1.3.0"),
     updateOptions := updateOptions.value.withCachedResolution(true),
     libraryDependencies ++= Seq(
       "io.spray" %% "spray-json" % "1.3.2",
