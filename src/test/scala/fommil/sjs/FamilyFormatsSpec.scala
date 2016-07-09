@@ -238,11 +238,31 @@ class FamilyFormatsSpec extends FlatSpec with Matchers
     roundtrip(Louie(Quack, None), """{}""")
     roundtrip(Bluey(Quack, None), """{"duck":null,"witch":null}""")
 
-    val json = """{"duck":null,"witch":null}""".parseJson
-    json.convertTo[Huey] shouldBe Huey(Quack, None)
-    json.convertTo[Dewey] shouldBe Dewey(Quack, Some(Quack))
-    json.convertTo[Louie] shouldBe Louie(Quack, None)
-    json.convertTo[Bluey] shouldBe Bluey(Quack, None)
+    val nulls = """{"duck":null,"witch":null}""".parseJson
+    nulls.convertTo[Huey] shouldBe Huey(Quack, None)
+    nulls.convertTo[Dewey] shouldBe Dewey(Quack, Some(Quack))
+    nulls.convertTo[Louie] shouldBe Louie(Quack, None)
+    nulls.convertTo[Bluey] shouldBe Bluey(Quack, None)
+
+    val partial = """{"duck":null}""".parseJson
+    intercept[DeserializationException] {
+      partial.convertTo[Huey] shouldBe Huey(Quack, None)
+    }
+    partial.convertTo[Dewey] shouldBe Dewey(Quack, None)
+    partial.convertTo[Louie] shouldBe Louie(Quack, None)
+    partial.convertTo[Bluey] shouldBe Bluey(Quack, None)
+
+    val empty = """{}""".parseJson
+    intercept[DeserializationException] {
+      empty.convertTo[Huey] shouldBe Huey(Quack, None)
+    }
+    intercept[DeserializationException] {
+      empty.convertTo[Dewey] shouldBe Dewey(Quack, None)
+    }
+    empty.convertTo[Louie] shouldBe Louie(Quack, None)
+    intercept[DeserializationException] {
+      empty.convertTo[Bluey] shouldBe Bluey(Quack, None)
+    }
   }
 
   it should "fail when missing required (null) values" in {
