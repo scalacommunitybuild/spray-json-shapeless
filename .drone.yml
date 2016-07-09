@@ -1,0 +1,28 @@
+build:
+  image: ensime/ensime:v1.x-cache
+  pull: true
+  environment:
+    - SONATYPE_USERNAME=$$SONATYPE_USERNAME
+    - SONATYPE_PASSWORD=$$SONATYPE_PASSWORD
+  commands:
+    - if $(git grep -qE "TODO|FIXME" -- `git ls-files | grep -v .drone.yml`) ; then
+        echo "Please remove TODO or FIXME. Create an issue at GitHub instead." ;
+        exit 1 ;
+      fi
+    - git log | head -n 20
+    - host `curl -s http://httpbin.org/ip | jq -r '.origin'` || true ;
+    - sbt ++$SCALA_VERSION test:compile doc;
+      if $(! git diff --exit-code --quiet) ; then
+        echo "Code formatting does not meet the project's standards:" ;
+        git --no-pager diff ;
+        exit 1 ;
+      fi
+    - sbt ++$SCALA_VERSION test
+    - if [ -z "$CI_PULL_REQUEST" ] ; then
+        sbt ++$SCALA_VERSION publish ;
+      fi
+
+matrix:
+  SCALA_VERSION:
+    - 2.11.8
+    - 2.10.6
