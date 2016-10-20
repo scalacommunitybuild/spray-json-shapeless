@@ -21,13 +21,11 @@ object Sensible {
 
     scalacOptions in Compile ++= Seq(
       "-encoding", "UTF-8",
-      "-target:jvm-1.6",
       "-feature",
       "-deprecation",
       "-language:postfixOps",
       "-language:implicitConversions",
       "-Xlint",
-      "-Yinline-warnings",
       "-Yno-adapted-args",
       "-Ywarn-dead-code",
       //"-Ywarn-numeric-widen", // noisy
@@ -42,10 +40,9 @@ object Sensible {
         else Nil
       },
     javacOptions in (Compile, compile) ++= Seq(
-      "-source", "1.6", "-target", "1.6", "-Xlint:all", "-Werror",
+      "-Xlint:all", "-Werror",
       "-Xlint:-options", "-Xlint:-path", "-Xlint:-processing"
     ),
-    javacOptions in doc ++= Seq("-source", "1.6"),
 
     javaOptions := Seq("-Xss2m", "-XX:MaxPermSize=256m", "-Xms384m", "-Xmx384m"),
     javaOptions += "-Dfile.encoding=UTF8",
@@ -65,8 +62,8 @@ object Sensible {
       "org.scala-lang" % "scala-library" % scalaVersion.value,
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.scala-lang" % "scalap" % scalaVersion.value,
-      "org.scala-lang.modules" %% "scala-xml" % scalaModulesVersion,
-      "org.scala-lang.modules" %% "scala-parser-combinators" % scalaModulesVersion,
+      "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
+      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
       "org.scalamacros" %% "quasiquotes" % quasiquotesVersion,
       "org.scalatest" %% "scalatest" % scalatestVersion
     ) ++ logback ++ guava ++ shapeless(scalaVersion.value)
@@ -121,7 +118,6 @@ object Sensible {
     testFrameworks := Seq(TestFrameworks.ScalaTest, TestFrameworks.JUnit)
   )
 
-  val scalaModulesVersion = "1.0.4"
   val akkaVersion = "2.3.15"
   val scalatestVersion = "3.0.0"
   val logbackVersion = "1.7.21"
@@ -149,10 +145,7 @@ object Sensible {
   def testLibs(config: String = "test") = Seq(
     "org.codehaus.janino" % "janino" % "2.7.8" % config,
     "org.scalatest" %% "scalatest" % scalatestVersion % config,
-    "org.scalamock" %% "scalamock-scalatest-support" % "3.2.2" % config,
-    "org.scalacheck" %% "scalacheck" % "1.13.2" % config,
-    "com.typesafe.akka" %% "akka-testkit" % akkaVersion % config,
-    "com.typesafe.akka" %% "akka-slf4j" % akkaVersion % config
+    "org.scalacheck" %% "scalacheck" % "1.13.2" % config
   ) ++ logback.map(_ % config)
 
   // e.g. YOURKIT_AGENT=/opt/yourkit/bin/linux-x86-64/libyjpagent.so

@@ -11,6 +11,7 @@ build:
       fi
     - git log | head -n 20
     - host `curl -s http://httpbin.org/ip | jq -r '.origin'` || true ;
+    - if [[ $SCALA_VERSION == 2.12* ]] ; then echo "1.8" > .java-version ; fi
     - sbt ++$SCALA_VERSION test:compile doc;
       if $(! git diff --exit-code --quiet) ; then
         echo "Code formatting does not meet the project's standards:" ;
@@ -24,5 +25,6 @@ build:
 
 matrix:
   SCALA_VERSION:
+    - 2.12.0-RC1
     - 2.11.8
     - 2.10.6
