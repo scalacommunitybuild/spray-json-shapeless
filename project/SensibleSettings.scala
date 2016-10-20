@@ -123,7 +123,7 @@ object Sensible {
 
   val scalaModulesVersion = "1.0.4"
   val akkaVersion = "2.3.15"
-  val scalatestVersion = "3.0.0-RC1"
+  val scalatestVersion = "3.0.0"
   val logbackVersion = "1.7.21"
   val quasiquotesVersion = "2.0.1"
   val guavaVersion = "19.0"
@@ -134,7 +134,7 @@ object Sensible {
   def shapeless(scalaVersion: String) = {
     if (scalaVersion.startsWith("2.10.")) macroParadise
     else Nil
-  } :+ "com.chuusai" %% "shapeless" % "2.3.1"
+  } :+ "com.chuusai" %% "shapeless" % "2.3.2"
   val logback = Seq(
     "ch.qos.logback" % "logback-classic" % "1.1.7",
     "org.slf4j" % "slf4j-api" % logbackVersion,
@@ -150,9 +150,7 @@ object Sensible {
     "org.codehaus.janino" % "janino" % "2.7.8" % config,
     "org.scalatest" %% "scalatest" % scalatestVersion % config,
     "org.scalamock" %% "scalamock-scalatest-support" % "3.2.2" % config,
-    // scalacheck 1.13.0 is incompatible with scalatest 2.2
-    // https://github.com/rickynils/scalacheck/issues/217
-    "org.scalacheck" %% "scalacheck" % "1.13.1" % config,
+    "org.scalacheck" %% "scalacheck" % "1.13.2" % config,
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion % config,
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion % config
   ) ++ logback.map(_ % config)
