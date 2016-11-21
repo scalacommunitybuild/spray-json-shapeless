@@ -10,13 +10,14 @@ build:
         exit 1 ;
       fi
     - git log | head -n 20
+    - git tag | xargs git tag -d
     - host `curl -s http://httpbin.org/ip | jq -r '.origin'` || true ;
     - case $SCALA_VERSION in 2.12*) echo 1.8 > .java-version ; esac ;
       git update-index --assume-unchanged .java-version
     - sbt ++$SCALA_VERSION test:compile doc;
-      if $(! git diff --exit-code --quiet *) ; then
+      if $(! git diff --exit-code --quiet ) ; then
         echo "Code formatting does not meet the project's standards:" ;
-        git --no-pager diff *;
+        git --no-pager diff ;
         exit 1 ;
       fi
     - sbt ++$SCALA_VERSION test mimaReportBinaryIssues
