@@ -18,7 +18,7 @@ build:
         git --no-pager diff ;
         exit 1 ;
       fi
-    - sbt ++$SCALA_VERSION test
+    - sbt ++$SCALA_VERSION test mimaReportBinaryIssues
     - if [ -z "$CI_PULL_REQUEST" ] ; then
         sbt ++$SCALA_VERSION publish ;
       fi
