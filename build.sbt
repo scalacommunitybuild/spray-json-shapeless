@@ -1,7 +1,6 @@
 scalaVersion in ThisBuild := "2.11.8"
-organization in ThisBuild := "com.github.fommil"
+organization := "com.github.fommil"
 name := "spray-json-shapeless"
-version := "1.3.1-SNAPSHOT"
 
 sonatypeGithub := ("fommil", "spray-json-shapeless")
 licenses := Seq(Apache2)
