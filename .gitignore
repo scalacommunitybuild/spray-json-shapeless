@@ -2,6 +2,7 @@ target/
 
 *.log
 
+.java-version
 .ensime*
 .sbtopts
 
