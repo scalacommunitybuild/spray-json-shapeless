@@ -5,7 +5,7 @@ import scala.collection.immutable.ListMap
 
 import spray.json._
 
-import shapeless._, labelled.{ field, FieldType }
+import shapeless._, labelled.{field, FieldType}
 
 /**
  * Automatically create product/coproduct marshallers (i.e. families
@@ -117,7 +117,7 @@ object FamilyFormats extends DefaultJsonProtocol with FamilyFormats
 
 /* low priority implicit scope so user-defined implicits take precedence */
 private[sjs] trait LowPriorityFamilyFormats
-    extends JsonFormatHints {
+  extends JsonFormatHints {
   this: StandardFormats with FamilyFormats =>
 
   private[sjs] def log = LoggerFactory.getLogger(getClass)
@@ -133,12 +133,12 @@ private[sjs] trait LowPriorityFamilyFormats
    * avoid ambiguous implicit errors.
    */
   abstract class WrappedRootJsonFormat[Wrapped, SubRepr](
-      implicit
-      tpe: Typeable[Wrapped]
+    implicit
+    tpe: Typeable[Wrapped]
   ) {
     final def read(j: JsValue): SubRepr = j match {
       case jso: JsObject => readJsObject(jso)
-      case other => unexpectedJson[Wrapped](other)
+      case other         => unexpectedJson[Wrapped](other)
     }
     def readJsObject(j: JsObject): SubRepr
     def write(v: SubRepr): JsObject
@@ -248,7 +248,7 @@ private[sjs] trait LowPriorityFamilyFormats
         case Inl(l) =>
           jfh.value.write(l) match {
             case j: JsObject => th.write(j, key.value)
-            case other => serError(s"expected JsObject, got $other")
+            case other       => serError(s"expected JsObject, got $other")
           }
 
         case Inr(r) =>
@@ -315,7 +315,7 @@ trait JsonFormatHints {
     def read[Name <: Symbol](j: JsObject, n: Name): Option[JsObject] = {
       j.fields.get(key) match {
         case Some(JsString(hint)) if hint == fieldName(n.name) => Some(j)
-        case Some(JsString(hint)) => None
+        case Some(JsString(hint))                              => None
         case _ =>
           deserError(s"missing $key, found ${j.fields.keys.mkString(",")}")
       }
@@ -343,7 +343,7 @@ trait JsonFormatHints {
     def read[Name <: Symbol](j: JsObject, n: Name): Option[JsObject] =
       j.fields.get(fieldName(n.name)).map {
         case jso: JsObject => jso
-        case other => unexpectedJson(other)
+        case other         => unexpectedJson(other)
       }
 
     def write[Name <: Symbol](j: JsObject, n: Name): JsObject =

@@ -78,14 +78,14 @@ trait LowPriorityUserFormats {
     def read(json: JsValue): Smash = json match {
       case obj: JsObject => obj.fields.head match {
         case ("flooma", JsString(label)) => Flooma(label)
-        case ("blam", JsString(label)) => Blam(label)
-        case _ => deserializationError("expected (kind,JsString), got " + json)
+        case ("blam", JsString(label))   => Blam(label)
+        case _                           => deserializationError("expected (kind,JsString), got " + json)
       }
       case _ => deserializationError("expected JsString, got " + json)
     }
     def write(obj: Smash): JsValue = obj match {
       case Flooma(label) => JsObject("flooma" -> JsString(label))
-      case Blam(label) => JsObject("blam" -> JsString(label))
+      case Blam(label)   => JsObject("blam" -> JsString(label))
     }
   }
 }
@@ -133,7 +133,7 @@ object ExamplesFormats extends DefaultJsonProtocol with FamilyFormats with LowPr
     // needed something that would serialise to JsNull for testing
     def read(j: JsValue): Quack.type = j match {
       case JsNull => Quack
-      case other => deserializationError(s"unexpected $other")
+      case other  => deserializationError(s"unexpected $other")
     }
     def write(q: Quack.type): JsValue = JsNull
   }
@@ -143,7 +143,7 @@ object ExamplesFormats extends DefaultJsonProtocol with FamilyFormats with LowPr
   implicit object SchpugelFormat extends JsonFormat[Schpugel] {
     def read(j: JsValue): Schpugel = j match {
       case JsString(v) => Schpugel(v)
-      case other => deserializationError(s"unexpected $other")
+      case other       => deserializationError(s"unexpected $other")
     }
     def write(s: Schpugel): JsValue = JsString(s.v)
   }
@@ -155,7 +155,7 @@ object ExamplesFormats extends DefaultJsonProtocol with FamilyFormats with LowPr
       case JsObject(els) if els.contains("smim") =>
         els("smim") match {
           case JsString(v) => Smim(v)
-          case other => deserializationError(s"unexpected $other")
+          case other       => deserializationError(s"unexpected $other")
         }
       case other => deserializationError(s"unexpected $other")
     }
@@ -164,7 +164,7 @@ object ExamplesFormats extends DefaultJsonProtocol with FamilyFormats with LowPr
 }
 
 class FamilyFormatsSpec extends FlatSpec with Matchers
-    with SprayJsonTestSupport {
+  with SprayJsonTestSupport {
   import examples._
   import ExamplesFormats._
 
