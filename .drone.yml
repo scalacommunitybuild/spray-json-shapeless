@@ -1,31 +1,31 @@
-build:
-  image: ensime/ensime:v2.x-cache
-  pull: true
-  environment:
-    - SONATYPE_USERNAME=$$SONATYPE_USERNAME
-    - SONATYPE_PASSWORD=$$SONATYPE_PASSWORD
-  commands:
-    - if $(git grep -qE "TODO|FIXME" -- `git ls-files | grep -v .drone.yml`) ; then
-        echo "Please remove TODO or FIXME. Create an issue at GitHub instead." ;
-        exit 1 ;
-      fi
-    - git log | head -n 20 ; git fetch --tags
-    - host `curl -s http://httpbin.org/ip | jq -r '.origin'` || true ;
-    - case $SCALA_VERSION in 2.12*) echo 1.8 > .java-version ; esac ;
-      git update-index --assume-unchanged .java-version
-    - sbt ++$SCALA_VERSION test:compile doc;
-      if $(! git diff --exit-code --quiet ) ; then
-        echo "Code formatting does not meet the project's standards:" ;
-        git --no-pager diff ;
-        exit 1 ;
-      fi
-    - sbt ++$SCALA_VERSION test mimaReportBinaryIssues
-    - if [ -z "$CI_PULL_REQUEST" ] ; then
-        sbt ++$SCALA_VERSION publish ;
-      fi
+pipeline:
+  build:
+    when:
+      branch: master
+    image: ensime/ensime:v2.x-cache
+    pull: true
+    commands:
+      - host `curl -s http://httpbin.org/ip | jq -r '.origin'` || true ;
+      - git log | head -n 20 ; git fetch -q --tags
+      - if $(git grep -qE "TODO|FIXME" *) ; then
+          echo "Please remove TODO or FIXME. Create an issue at GitHub instead." ;
+          exit 1 ;
+        fi
+      - case $SCALA_VERSION in 2.12*) echo 1.8 > .java-version ; esac ;
+        git update-index --assume-unchanged .java-version
+      - sbt ++$SCALA_VERSION test:compile doc;
+        if $(! git diff --exit-code --quiet ) ; then
+          echo "Code formatting does not meet the project's standards:" ;
+          git --no-pager diff ;
+          exit 1 ;
+        fi
+      - sbt ++$SCALA_VERSION test mimaReportBinaryIssues
+      - if [ -z "$DRONE_PULL_REQUEST" ] ; then
+          sbt ++$SCALA_VERSION publish ;
+        fi
 
 matrix:
   SCALA_VERSION:
-    - 2.12.0
+    - 2.12.1
     - 2.11.8
     - 2.10.6
