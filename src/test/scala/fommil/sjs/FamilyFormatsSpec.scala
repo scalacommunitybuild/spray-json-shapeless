@@ -36,6 +36,16 @@ package examples {
   case class Louie(duck: Quack.type, witch: Option[Quack.type])
   case class Bluey(duck: Quack.type, witch: Option[Quack.type])
 
+  case class Mickey(mouse: String, num: Int = 3)
+  case class Billy(thing: Int, label: String, other: Int = 5, mickey: Mickey = Mickey("mouse", 3))
+
+  sealed trait Paff
+  case class Piff(s: String) extends Paff
+  case class Mozz(n: String, m: Int = 4, lal: Lal = Paf("hello")) extends Paff
+
+  sealed trait Lal
+  case class Paf(label: String, other: String = "other") extends Lal
+
   // I love monkeys, you got a problem with that?
   sealed trait Primates
   sealed trait Strepsirrhini extends Primates
@@ -114,7 +124,6 @@ object ExamplesFormats extends DefaultJsonProtocol with FamilyFormats with LowPr
   implicit object PloobaHint extends ProductHint[Plooba] {
     override def fieldName[K <: Symbol](k: K): String = k.name.toUpperCase
   }
-
   ///////////////////////////////////////////////
   // user-defined /missing value rules
   implicit object HueyHint extends ProductHint[Huey] {
@@ -137,7 +146,15 @@ object ExamplesFormats extends DefaultJsonProtocol with FamilyFormats with LowPr
     }
     def write(q: Quack.type): JsValue = JsNull
   }
-
+  implicit object TestHint extends ProductHint[Billy] {
+    override def nulls = UseDefaultJsNull
+  }
+  implicit object MozzHint extends ProductHint[Mozz] {
+    override def nulls = UseDefaultJsNull
+  }
+  implicit object PafHint extends ProductHint[Paf] {
+    override def nulls = UseDefaultJsNull
+  }
   ///////////////////////////////////////////////
   // user-defined JsonFormat
   implicit object SchpugelFormat extends JsonFormat[Schpugel] {
@@ -230,6 +247,14 @@ class FamilyFormatsSpec extends FlatSpec with Matchers
 
   it should "support custom product field naming rules" in {
     roundtrip(Plooba("poo"), """{"THING":"poo"}""")
+  }
+
+  it should "support default value for product" in {
+    """{"thing": 1, "label": "test"}""".parseJson.convertTo[Billy] shouldBe Billy(1, "test", 5, Mickey("mouse", 3))
+  }
+
+  it should "support default parameters on coproducts" in {
+    """{"type":"Mozz","n":"wow"}""".parseJson.convertTo[Paff] shouldBe Mozz("wow", 4, Paf("hello"))
   }
 
   it should "support custom missing value rules" in {
