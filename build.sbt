@@ -11,7 +11,7 @@ libraryDependencies ++= Seq(
 ) ++ {
   CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, 10)) =>
-      Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full))
+      Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.patch))
     case _ => Nil
   }
 } ++ Seq("com.chuusai" %% "shapeless" % "2.3.2")
