@@ -1,4 +1,4 @@
-scalaVersion in ThisBuild := "2.11.8"
+scalaVersion in ThisBuild := "2.12.1"
 organization := "com.github.fommil"
 name := "spray-json-shapeless"
 

@@ -36,17 +36,3 @@ object use {
   (Faz(None): SimpleTrait).toJson  // """{"type":"Faz"}"""
 }
 ```
-
-## License
-
-`spray-json-shapeless` is [Free Software][free] under the Apache License v2.
-
-I would prefer a [copyleft][copyleft] license because [TypeSafe have set the precedent of closing sources][precedent] and it is extremely concerning that this is happening within our community.
-
-However, both of the primary upstream projects, [spray-json][spray-json] and [shapeless][shapeless], are published under Apache v2, so it is more appropriate to publish this project on the same terms.
-
-[free]: http://www.gnu.org/philosophy/free-sw.en.html
-[copyleft]: http://www.gnu.org/copyleft/copyleft.en.html
-[precedent]: https://github.com/smootoo/freeslick#history
-[spray-json]: https://github.com/spray/spray-json
-[shapeless]: https://github.com/milessabin/shapeless

@@ -1,0 +1,11 @@
+spray-json-shapeless
+Copyright 2015 - 2017 Sam Halliday
+
+I would prefer a [copyleft][copyleft] license. However, both of the
+primary upstream projects, [spray-json][spray-json] and
+[shapeless][shapeless], are published under Apache v2, so it is more
+appropriate to publish this project on the same terms.
+
+[copyleft]: http://www.gnu.org/copyleft/copyleft.en.html
+[spray-json]: https://github.com/spray/spray-json
+[shapeless]: https://github.com/milessabin/shapeless
