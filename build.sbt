@@ -29,7 +29,7 @@ dependencyOverrides ++= Set(
 }
 
 scalacOptions in Compile ++= Seq(
-  "-encoding", "UTF-8", "-target:jvm-1.6", "-feature", "-deprecation",
+  "-encoding", "UTF-8", "-feature", "-deprecation",
   "-Xfatal-warnings",
   "-language:postfixOps", "-language:implicitConversions"
 )
